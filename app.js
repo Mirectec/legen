@@ -41,8 +41,13 @@ async function verifyDomainIPv6(domain) {
             return true;  // If no AAAA record is found, consider it as passed.
         }
     } catch (error) {
-        console.log(`Domain verification failed for ${domain} (IPv6): ${error.message}`);
-        return false;
+        if (error.code === 'ENODATA' || error.code === 'ENOTFOUND') {
+            console.log(`Domain verification failed for ${domain} (IPv6): No AAAA record found`);
+            return true;  // If no AAAA record is found, consider it as passed.
+        } else {
+            console.log(`Domain verification failed for ${domain} (IPv6): ${error.message}`);
+            return false;
+        }
     }
 }
 
