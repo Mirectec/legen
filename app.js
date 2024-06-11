@@ -11,8 +11,15 @@ const expectedContent = 'test'; // Očekávaný obsah testovacího souboru
 async function verifyDomain(domain) {
     try {
         const response = await axios.get(`http://${domain}/.well-known/acme-challenge/test-file.txt`);
-        return response.status === 200 && response.data.trim() === expectedContent;
+        if (response.status === 200 && response.data.trim() === expectedContent) {
+            console.log(`Domain verification successful for ${domain} (IPv4)`);
+            return true;
+        } else {
+            console.log(`Domain verification failed for ${domain} (IPv4): Invalid content`);
+            return false;
+        }
     } catch (error) {
+        console.log(`Domain verification failed for ${domain} (IPv4): ${error.message}`);
         return false;
     }
 }
@@ -22,9 +29,19 @@ async function verifyDomainIPv6(domain) {
         const ipv6Addresses = await dns.resolve6(domain);
         if (ipv6Addresses.length > 0) {
             const response = await axios.get(`http://${domain}/.well-known/acme-challenge/test-file.txt`, { family: 6 });
-            return response.status === 200 && response.data.trim() === expectedContent;
+            if (response.status === 200 && response.data.trim() === expectedContent) {
+                console.log(`Domain verification successful for ${domain} (IPv6)`);
+                return true;
+            } else {
+                console.log(`Domain verification failed for ${domain} (IPv6): Invalid content`);
+                return false;
+            }
+        } else {
+            console.log(`Domain verification failed for ${domain} (IPv6): No AAAA record found`);
+            return false;
         }
     } catch (error) {
+        console.log(`Domain verification failed for ${domain} (IPv6): ${error.message}`);
         return false;
     }
 }
@@ -49,6 +66,8 @@ async function processDomains() {
     for (const entry of domains) {
         const domain = entry.domain;
         const wwwDomain = `www.${domain}`;
+
+        console.log(`Starting verification for ${domain} and ${wwwDomain}`);
 
         const [isDomainVerified, isWwwDomainVerified, isDomainIPv6Verified, isWwwDomainIPv6Verified] = await Promise.all([
             verifyDomain(domain),
@@ -85,4 +104,3 @@ chokidar.watch(domainsFile).on('change', () => {
 
 // Initial run
 processDomains();
-
