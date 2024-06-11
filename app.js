@@ -38,7 +38,7 @@ async function verifyDomainIPv6(domain) {
             }
         } else {
             console.log(`Domain verification failed for ${domain} (IPv6): No AAAA record found`);
-            return false;
+            return true;  // If no AAAA record is found, consider it as passed.
         }
     } catch (error) {
         console.log(`Domain verification failed for ${domain} (IPv6): ${error.message}`);
@@ -69,10 +69,13 @@ async function processDomains() {
 
         console.log(`Starting verification for ${domain} and ${wwwDomain}`);
 
-        const [isDomainVerified, isWwwDomainVerified, isDomainIPv6Verified, isWwwDomainIPv6Verified] = await Promise.all([
+        const [isDomainVerified, isDomainIPv6Verified] = await Promise.all([
             verifyDomain(domain),
+            verifyDomainIPv6(domain)
+        ]);
+
+        const [isWwwDomainVerified, isWwwDomainIPv6Verified] = await Promise.all([
             verifyDomain(wwwDomain),
-            verifyDomainIPv6(domain),
             verifyDomainIPv6(wwwDomain)
         ]);
 
