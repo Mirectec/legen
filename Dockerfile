@@ -16,7 +16,7 @@ RUN apk add --no-cache bash curl openssl && \
     curl https://get.acme.sh | sh && \
     ln -s /root/.acme.sh/acme.sh /usr/local/bin/acme.sh && \
     acme.sh --set-default-ca --server letsencrypt
-....
+    
 RUN rm -rf /var/cache/apk/*
 
 # Vytvořte potřebné adresáře
