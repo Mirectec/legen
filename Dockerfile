@@ -1,26 +1,26 @@
 # Použijte oficiální Node.js image
 FROM node:lts-alpine
 
-# Nastavení pracovního adresáře v kontejneru
+# Nastavte pracovní adresář
 WORKDIR /usr/src/app
 
-# Kopírování package.json a package-lock.json do pracovního adresáře
-COPY package*.json ./
-
-# Instalace závislostí
+# Zkopírujte package.json a nainstalujte závislosti
+COPY package.json ./
 RUN npm install
 
-# Kopírování aplikace do pracovního adresáře
+# Zkopírujte zbytek aplikačních souborů
 COPY . .
 
-# Instalace acme.sh
-RUN curl https://get.acme.sh | sh
+# Stáhněte a nainstalujte acme.sh
+RUN apk add --no-cache bash curl openssl && \
+    curl https://get.acme.sh | sh && \
+    ln -s /root/.acme.sh/acme.sh /usr/local/bin/acme.sh && \
+    acme.sh --set-default-ca --server letsencrypt
+....
+RUN rm -rf /var/cache/apk/*
 
-# Přidání acme.sh do PATH
-ENV PATH="/root/.acme.sh/:$PATH"
-
-# Vytvoření potřebných složek
+# Vytvořte potřebné adresáře
 RUN mkdir -p /var/www/shared-webroot /var/www/certs /var/www/nginx /var/www/logs
 
-# Spuštění aplikace
+# Nastavte příkazy, které se mají spustit při startu kontejneru
 CMD ["node", "app.js"]
