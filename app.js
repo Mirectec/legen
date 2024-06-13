@@ -6,6 +6,7 @@ const cron = require('node-cron');
 const chokidar = require('chokidar');
 const path = require('path');
 const logFile = '/var/www/logs/letsencrypt.log';
+const acmeLogFile = '/var/www/logs/acmesh.log';
 
 const domainsFile = 'domains.json';
 const sharedWebroot = '/var/www/shared-webroot';
@@ -50,12 +51,12 @@ function generateCertificate(domains) {
     return new Promise((resolve, reject) => {
         const domainArgs = domains.map(d => `-d ${d}`).join(' ');
         const certHome = '/var/www/certs';
-        exec(`~/.acme.sh/acme.sh --issue ${domainArgs} --webroot ${sharedWebroot} --cert-home ${certHome} --keylength 2048`, (error, stdout, stderr) => {
+        exec(`LOG_FILE=${acmeLogFile} ~/.acme.sh/acme.sh --issue ${domainArgs} --webroot ${sharedWebroot} --cert-home ${certHome} --keylength 2048`, (error, stdout, stderr) => {
             if (error) {
                 if (stderr.includes('Certificate not yet due for renewal')) {
                     resolve(`No need to renew certificate for ${domains.join(', ')}: ${stderr}`);
                 } else {
-                    reject(`error: ${error.message}`);
+                    reject(`error: ${error.message}\nACME log:\n${stderr}`);
                 }
             } else if (stderr) {
                 reject(`stderr: ${stderr}`);
