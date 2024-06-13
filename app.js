@@ -53,7 +53,7 @@ function generateCertificate(domains) {
         const certHome = '/var/www/certs';
         exec(`LOG_FILE=${acmeLogFile} ~/.acme.sh/acme.sh --issue ${domainArgs} --webroot ${sharedWebroot} --cert-home ${certHome} --keylength 2048`, (error, stdout, stderr) => {
             if (error) {
-                if (stderr.includes('Certificate not yet due for renewal')) {
+                if (stderr.includes('Domains not changed')) {
                     resolve(`No need to renew certificate for ${domains.join(', ')}: ${stderr}`);
                 } else {
                     reject(`error: ${error.message}\nACME log:\n${stderr}`);
