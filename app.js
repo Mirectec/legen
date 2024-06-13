@@ -58,7 +58,7 @@ function generateCertificate(domains) {
             //logMessage(`Command stderr: ${stderr}`);
             if (error) {
                 if (stdout.includes('Domains not changed.') || stdout.includes('Skip, Next renewal time is')) {
-                    resolve(`No need to renew certificate for ${domains.join(', ')}: ${stdout}`);
+                    resolve(`No need to renew certificate for ${domains.join(', ')}`);
                 } else {
                     reject(`error: ${error.message}\nACME log:\n${stdout}`);
                 }
