@@ -54,13 +54,13 @@ function generateCertificate(domains) {
         const command = `LOG_FILE=${acmeLogFile} ~/.acme.sh/acme.sh --issue ${domainArgs} --webroot ${sharedWebroot} --cert-home ${certHome} --keylength 2048`;
         logMessage(`Executing command: ${command}`);
         exec(command, (error, stdout, stderr) => {
-            logMessage(`Command stdout: ${stdout}`);
-            logMessage(`Command stderr: ${stderr}`);
+            //logMessage(`Command stdout: ${stdout}`);
+            //logMessage(`Command stderr: ${stderr}`);
             if (error) {
-                if (stderr.includes('Domains not changed.') || stderr.includes('Skip, Next renewal time is')) {
-                    resolve(`No need to renew certificate for ${domains.join(', ')}: ${stderr}`);
+                if (stdout.includes('Domains not changed.') || stdout.includes('Skip, Next renewal time is')) {
+                    resolve(`No need to renew certificate for ${domains.join(', ')}: ${stdout}`);
                 } else {
-                    reject(`error: ${error.message}\nACME log:\n${stderr}`);
+                    reject(`error: ${error.message}\nACME log:\n${stdout}`);
                 }
             } else if (stderr) {
                 reject(`stderr: ${stderr}`);
