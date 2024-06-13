@@ -50,9 +50,13 @@ function generateCertificate(domains) {
     return new Promise((resolve, reject) => {
         const domainArgs = domains.map(d => `-d ${d}`).join(' ');
         const certHome = '/var/www/certs';
-        exec(`~/.acme.sh/acme.sh --issue ${domainArgs} --webroot ${sharedWebroot} --cert-home ${certHome} --keylength 2048`, (error, stdout, stderr) => {
+        exec(`~/.acme.sh/acme.sh --issue ${domainArgs} --webroot ${sharedWebroot} --cert-home ${certHome}`, (error, stdout, stderr) => {
             if (error) {
-                reject(`error: ${error.message}`);
+                if (stderr.includes('Certificate not yet due for renewal')) {
+                    resolve(`No need to renew certificate for ${domains.join(', ')}: ${stderr}`);
+                } else {
+                    reject(`error: ${error.message}`);
+                }
             } else if (stderr) {
                 reject(`stderr: ${stderr}`);
             } else {
@@ -95,7 +99,7 @@ async function processDomains() {
             const domainsToCertify = (isWwwDomainVerified && isWwwDomainIPv6Verified) ? [domain, wwwDomain] : [domain];
             try {
                 const result = await generateCertificate(domainsToCertify);
-                logMessage(`Certificate generated for ${domainsToCertify.join(', ')}: ${result}`);
+                logMessage(`Certificate generated or validated for ${domainsToCertify.join(', ')}: ${result}`);
             } catch (error) {
                 logMessage(`Failed to generate certificate for ${domain}: ${error}`);
             }
