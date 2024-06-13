@@ -51,7 +51,11 @@ function generateCertificate(domains) {
     return new Promise((resolve, reject) => {
         const domainArgs = domains.map(d => `-d ${d}`).join(' ');
         const certHome = '/var/www/certs';
-        exec(`LOG_FILE=${acmeLogFile} ~/.acme.sh/acme.sh --issue ${domainArgs} --webroot ${sharedWebroot} --cert-home ${certHome}`, (error, stdout, stderr) => {
+        const command = `LOG_FILE=${acmeLogFile} ~/.acme.sh/acme.sh --issue ${domainArgs} --webroot ${sharedWebroot} --cert-home ${certHome} --keylength 2048`;
+        logMessage(`Executing command: ${command}`);
+        exec(command, (error, stdout, stderr) => {
+            logMessage(`Command stdout: ${stdout}`);
+            logMessage(`Command stderr: ${stderr}`);
             if (error) {
                 if (stderr.includes('Domains not changed.') || stderr.includes('Skip, Next renewal time is')) {
                     resolve(`No need to renew certificate for ${domains.join(', ')}: ${stderr}`);
