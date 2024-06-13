@@ -50,7 +50,7 @@ function generateCertificate(domains) {
     return new Promise((resolve, reject) => {
         const domainArgs = domains.map(d => `-d ${d}`).join(' ');
         const certHome = '/var/www/certs';
-        exec(`~/.acme.sh/acme.sh --issue ${domainArgs} --webroot ${sharedWebroot} --cert-home ${certHome}`, (error, stdout, stderr) => {
+        exec(`~/.acme.sh/acme.sh --issue ${domainArgs} --webroot ${sharedWebroot} --cert-home ${certHome} --keylength 2048`, (error, stdout, stderr) => {
             if (error) {
                 if (stderr.includes('Certificate not yet due for renewal')) {
                     resolve(`No need to renew certificate for ${domains.join(', ')}: ${stderr}`);
